@@ -35,6 +35,8 @@ x_symbols = np.cos(x_radians) + 1j*np.sin(x_radians) # this produces our QPSK co
 samples = np.repeat(x_symbols, 16) # 16 samples per symbol (rectangular pulses)
 samples *= 2**14 # The PlutoSDR expects samples to be between -2^14 and +2^14, not -1 and +1 like some SDRs
 
+print(samples)
+
 # Start the transmitter
 sdr.tx_cyclic_buffer = True # Enable cyclic buffers
 sdr.tx(samples) # start transmitting
