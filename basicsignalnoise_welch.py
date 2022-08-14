@@ -19,19 +19,19 @@ PSD_log = 10.0*np.log10(PSD)
 PSD_shifted = np.fft.fftshift(PSD_log)
 f = np.arange(Fs/-2.0, Fs/2.0, Fs/N) # start, stop, step
 
-_, psd = signal.welch(r, Fs, 'hamming', psd_length, return_onesided=True, scaling='density', average='median')
+_, psd = signal.welch(r, Fs, 'hamming', psd_length, return_onesided=False, scaling='density', average='median')
 psd_dB = np.fft.fftshift(10*np.log10((np.abs(psd)/psd.shape[0])**2)) + 44  # small miscalculation I made requiring an offset to correct the graph
 f_welch = np.linspace(Fs/-2.0, Fs/2.0, psd_length)
 
-plt.figure(figsize=(18,12))
+plt.figure(figsize=(12,6))
 plt.subplot(121)
-plt.plot(t, np.sin(2*np.pi*50*t))
+plt.plot(t, r)
 plt.xlabel("Time [s]")
 plt.ylabel("Amplitude")
 plt.title("Time Domain")
 plt.subplot(122)
 plt.plot(f, PSD_shifted, label="FFT")
-plt.plot(f_welch, psd_dB, label="Welch")
+# plt.plot(f_welch, psd_dB, label="Welch")
 plt.xlabel("Frequency [Hz]")
 plt.ylabel("Magnitude [dB]")
 plt.title("Frequency Domain")
