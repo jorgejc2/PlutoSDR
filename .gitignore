@@ -1,2 +1,4 @@
 *.pyc
 __pycache___/
+
+converted_png_images/
