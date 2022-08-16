@@ -6,51 +6,86 @@ import sys
 
 # Node creation
 class Node():
-    def __init__(self, item):
+    def __init__(self, item, value):
         self.item = item
+        self.value = value
         self.parent = None
         self.left = None
         self.right = None
         self.color = 1
 
+    def __repr__(self):
+        return f"""Item (key): {self.item}
+        Value: {self.value}
+        Color: {'RED' if self.color else 'BLACK'}"""
+
 
 class RedBlackTree():
     def __init__(self):
-        self.TNULL = Node(0)
+        self.TNULL = Node(0,0)
         self.TNULL.color = 0
         self.TNULL.left = None
         self.TNULL.right = None
         self.root = self.TNULL
+        self.size = 0
 
     # Preorder
     def pre_order_helper(self, node):
-        if node != TNULL:
+        if node != self.TNULL:
             sys.stdout.write(node.item + " ")
             self.pre_order_helper(node.left)
             self.pre_order_helper(node.right)
 
     # Inorder
-    def in_order_helper(self, node):
-        if node != TNULL:
-            self.in_order_helper(node.left)
-            sys.stdout.write(node.item + " ")
-            self.in_order_helper(node.right)
+    def in_order_helper(self, node, in_order_list):
+        if node != self.TNULL:
+            self.in_order_helper(node.left, in_order_list)
+            # sys.stdout.write(node.item + " ")
+            in_order_list.append(node.value)
+            self.in_order_helper(node.right, in_order_list)
 
     # Postorder
     def post_order_helper(self, node):
-        if node != TNULL:
+        if node != self.TNULL:
             self.post_order_helper(node.left)
             self.post_order_helper(node.right)
             sys.stdout.write(node.item + " ")
 
+    def _list_keys_helper(self, node, list_keys):
+        if node != self.TNULL:
+            self._list_keys_helper(node.left, list_keys)
+            list_keys.append(node.item)
+            self._list_keys_helper(node.right, list_keys)
+
     # Search the tree
     def search_tree_helper(self, node, key):
-        if node == TNULL or key == node.item:
+        if node == self.TNULL or key == node.item:
             return node
 
         if key < node.item:
             return self.search_tree_helper(node.left, key)
         return self.search_tree_helper(node.right, key)
+
+    # Search the tree
+    def _approximateKey_helper(self, node, key, distance):
+
+        if node == self.TNULL:
+            return node
+        
+        if node.item == key:
+            return node
+
+        curr_distance = abs(key - node.item)
+
+        if curr_distance > distance:
+            return node.parent
+
+        if key < node.item and node.left != self.TNULL:
+            return self._approximateKey_helper(node.left, key, curr_distance)
+        elif node.right != self.TNULL:
+            return self._approximateKey_helper(node.right, key, curr_distance)
+        else:
+            return node
 
     # Balancing the tree after deletion
     def delete_fix(self, x):
@@ -202,7 +237,7 @@ class RedBlackTree():
                 indent += "|    "
 
             s_color = "RED" if node.color == 1 else "BLACK"
-            print(str(node.item) + "(" + s_color + ")")
+            print("k: " + str(node.item) + f" v: {node.value} " + f"parent: {node.parent.item if node.parent is not None else 'NONE' } " + "(" + s_color + ")")
             self.__print_helper(node.left, indent, False)
             self.__print_helper(node.right, indent, True)
 
@@ -210,13 +245,23 @@ class RedBlackTree():
         self.pre_order_helper(self.root)
 
     def inorder(self):
-        self.in_order_helper(self.root)
+        in_order_list = []
+        self.in_order_helper(self.root, in_order_list)
+        return in_order_list
 
     def postorder(self):
         self.post_order_helper(self.root)
 
+    def listKeys(self):
+        key_list = []
+        self._list_keys_helper(self.root, key_list)
+        return key_list
+
     def searchTree(self, k):
         return self.search_tree_helper(self.root, k)
+
+    def approximateKey(self, k):
+        return self._approximateKey_helper(self.root, k, abs(self.root.item - k) + 1)
 
     def minimum(self, node):
         while node.left != self.TNULL:
@@ -281,13 +326,15 @@ class RedBlackTree():
         y.right = x
         x.parent = y
 
-    def insert(self, key):
-        node = Node(key)
+    def insert(self, key, value):
+        node = Node(key, value)
         node.parent = None
-        node.item = key
+        # node.item = key
+        # node.value = value
         node.left = self.TNULL
         node.right = self.TNULL
         node.color = 1
+        self.size += 1
 
         y = None
         x = self.root
@@ -321,23 +368,31 @@ class RedBlackTree():
 
     def delete_node(self, item):
         self.delete_node_helper(self.root, item)
+        self.size -= 1
 
-    def print_tree(self):
+    def __repr__(self):
         self.__print_helper(self.root, "", True)
+        return ""
 
 
 if __name__ == "__main__":
     bst = RedBlackTree()
 
-    bst.insert(55)
-    bst.insert(40)
-    bst.insert(65)
-    bst.insert(60)
-    bst.insert(75)
-    bst.insert(57)
+    # bst.insert(55, 0)
+    # bst.insert(40, 1)
+    # bst.insert(65, 2)
+    # bst.insert(60, 3)
+    # bst.insert(75, 4)
+    # bst.insert(57, 5)
 
-    bst.print_tree()
+    print(bst)
 
-    print("\nAfter deleting an element")
-    bst.delete_node(40)
-    bst.print_tree()
+    # print("\nAfter deleting an element")
+    # bst.delete_node(40)
+    # print(bst)
+
+    node: Node = bst.searchTree(55)
+    approx: Node = bst.approximateKey(69)
+    print(node)
+    approx.value = 20
+    print(approx)
